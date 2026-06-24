@@ -54,21 +54,48 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1|max:' . $invoice->balance,
-            'payment_method' => 'required|string|in:cash,bank_transfer,momo',
-            'reference_number' => 'nullable|string|max:255',
+            'payment_method' => 'required|string|in:cash,bank_transfer,momo,card',
             'payment_date' => 'required|date',
+            'reference_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
+            
+            // MoMo Validation
+            'momo_provider' => 'required_if:payment_method,momo|nullable|string|in:mtn,telecel,at',
+            'momo_number' => 'required_if:payment_method,momo|nullable|string|regex:/^[0-9]{10}$/',
+            
+            // Card Validation
+            'card_number' => 'required_if:payment_method,card|nullable|string|regex:/^[0-9]{16}$/',
+            'card_expiry' => 'required_if:payment_method,card|nullable|string|regex:/^(0[1-9]|1[0-2])\/[0-9]{2}$/',
+            'card_cvv' => 'required_if:payment_method,card|nullable|string|regex:/^[0-9]{3}$/',
+        ], [
+            'momo_number.regex' => 'The mobile money number must be exactly 10 digits.',
+            'card_number.regex' => 'The card number must be exactly 16 digits.',
+            'card_expiry.regex' => 'The expiry date must be in MM/YY format.',
+            'card_cvv.regex' => 'The CVV must be exactly 3 digits.',
         ]);
 
-        DB::transaction(function () use ($validated, $invoice) {
+        $notes = $validated['notes'] ?? '';
+        if ($validated['payment_method'] === 'momo') {
+            $momoInfo = 'Momo via ' . strtoupper($validated['momo_provider']) . ' (' . $validated['momo_number'] . ')';
+            $notes = $notes ? $notes . ' | ' . $momoInfo : $momoInfo;
+        } elseif ($validated['payment_method'] === 'card') {
+            $maskedCard = 'XXXX-XXXX-XXXX-' . substr($validated['card_number'], -4);
+            $cardInfo = 'Card payment via ' . $maskedCard;
+            $notes = $notes ? $notes . ' | ' . $cardInfo : $cardInfo;
+        }
+
+        DB::transaction(function () use ($validated, $invoice, $notes) {
+            $refPrefix = strtoupper($validated['payment_method']);
+            $refNumber = $validated['reference_number'] ?? ($refPrefix . '-' . strtoupper(Str::random(10)));
+
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'amount' => $validated['amount'],
                 'payment_date' => $validated['payment_date'],
                 'payment_method' => $validated['payment_method'],
-                'reference_number' => $validated['reference_number'] ?? 'REF-' . strtoupper(Str::random(6)),
+                'reference_number' => $refNumber,
                 'recorded_by' => Auth::id(),
-                'notes' => $validated['notes'],
+                'notes' => $notes,
             ]);
 
             // Generate a Receipt
