@@ -80,9 +80,24 @@
                                         <span class="uppercase font-bold px-2 py-0.5 rounded text-[10px] {{ $invoice->status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' }}">{{ $invoice->status }}</span>
                                     </p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-bold text-azure-950">GHS {{ number_format($invoice->balance, 2) }}</p>
-                                    <p class="text-xs text-azure-400 mt-0.5">Balance</p>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-azure-950 font-mono">GHS {{ number_format($invoice->balance, 2) }}</p>
+                                        <p class="text-xs text-azure-400 mt-0.5">Balance</p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-azure-600 hover:text-azure-800 p-1.5 bg-azure-50 hover:bg-azure-100 rounded-lg transition-colors border border-azure-100" title="View Details">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        @if($invoice->status !== 'paid')
+                                            <a href="{{ route('student.payments.pay', $invoice) }}" class="text-white bg-gradient-to-r from-emerald-600 to-emerald-550 hover:from-emerald-700 hover:to-emerald-600 px-3 py-1.5 text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow active:scale-95" title="Pay Now">
+                                                Pay
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @empty

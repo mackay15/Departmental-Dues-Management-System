@@ -4,9 +4,11 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Invoices') }}
             </h2>
+            @unless(auth()->user()->hasRole('Student'))
             <a href="{{ route('invoices.generate') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
                 Generate Invoices
             </a>
+            @endunless
         </div>
     </x-slot>
 
@@ -82,8 +84,11 @@
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Unpaid</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                             <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                                            @if(auth()->user()->hasRole('Student') && $invoice->status !== 'paid')
+                                                <a href="{{ route('student.payments.pay', $invoice) }}" class="text-emerald-650 hover:text-emerald-800 font-bold">Pay Now</a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

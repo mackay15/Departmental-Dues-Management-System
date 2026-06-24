@@ -29,6 +29,10 @@ Route::middleware('auth')->group(function () {
     Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::get('payments/{payment}/receipt', [ReceiptController::class, 'download'])->name('receipts.download');
 
+    // Student Self-Service Payment Routes
+    Route::get('invoices/{invoice}/pay', [\App\Http\Controllers\StudentPaymentController::class, 'showPayForm'])->name('student.payments.pay');
+    Route::post('invoices/{invoice}/pay', [\App\Http\Controllers\StudentPaymentController::class, 'processPayment'])->name('student.payments.process');
+
     // Staff Only Routes (Admins, HODs, Finance, Auditors)
     Route::middleware('non_student')->group(function () {
         // Students Import Routes

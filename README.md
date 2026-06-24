@@ -373,6 +373,7 @@ Students can:
 - Download Receipts
 - Receive Notifications
 - View Outstanding Balance
+- Make Online Payments (Simulated Mobile Money & Card checkouts)
 
 ---
 

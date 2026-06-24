@@ -11,9 +11,15 @@
             </div>
             <div>
                 @if($invoice->status !== 'paid')
-                    <a href="{{ route('payments.create', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
-                        Record Payment
-                    </a>
+                    @if(auth()->user()->hasRole('Student'))
+                        <a href="{{ route('student.payments.pay', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-azure-800 to-azure-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-azure-900 hover:to-azure-700 shadow-md">
+                            Pay Now
+                        </a>
+                    @else
+                        <a href="{{ route('payments.create', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
+                            Record Payment
+                        </a>
+                    @endif
                 @endif
             </div>
         </div>
