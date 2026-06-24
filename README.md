@@ -322,33 +322,18 @@ Each log stores:
 
 # User Roles
 
-## Administrator
+## Head of Department (HOD) / Administrator
 
-Permissions
+The HOD serves as the primary administrator of the system.
 
-- Full System Access
-- Manage Users
-- Manage Roles
-- Manage Academic Sessions
-- Manage Dues
-- View Reports
-- Configure System
+Permissions & Responsibilities:
 
----
-
-## Head of Department (HOD)
-
-Responsible for
-
-- Student Promotion
-- Programme Management
-- Academic Sessions
-- Reports
+- Full System Access & Configuration
+- Manage Staff Users (Finance Officer, Auditor, HOD)
+- Student Promotion & Academic progression
+- Manage Academic Sessions & Dues
+- View Reports & Audit Logs
 - Student Verification
-
-Cannot:
-
-- Delete Payments
 
 ---
 
@@ -637,21 +622,15 @@ php artisan serve
 
 # Default Accounts
 
-Administrator
+HOD / Administrator
 
-admin@compssa.edu.gh
+hod@compssa.edu.gh
 
 password
 
 Finance Officer
 
 finance@compssa.edu.gh
-
-password
-
-HOD
-
-hod@compssa.edu.gh
 
 password
 

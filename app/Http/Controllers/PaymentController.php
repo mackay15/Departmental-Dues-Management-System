@@ -16,6 +16,13 @@ class PaymentController extends Controller
     {
         $query = Payment::with(['invoice.student', 'recordedBy']);
 
+        $user = auth()->user();
+        if ($user && $user->hasRole('Student') && $user->student) {
+            $query->whereHas('invoice', function ($q) use ($user) {
+                $q->where('student_id', $user->student->id);
+            });
+        }
+
         if ($request->has('search')) {
             $search = $request->get('search');
             $query->where('reference_number', 'like', "%{$search}%")

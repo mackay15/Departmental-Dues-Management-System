@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-azure-800 leading-tight tracking-tight">
-            {{ __('Administrator Dashboard') }}
+            {{ __('HOD Dashboard') }}
         </h2>
     </x-slot>
 

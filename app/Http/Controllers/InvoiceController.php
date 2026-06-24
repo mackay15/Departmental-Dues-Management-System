@@ -18,6 +18,11 @@ class InvoiceController extends Controller
     {
         $query = Invoice::with(['student', 'academicSession']);
         
+        $user = auth()->user();
+        if ($user && $user->hasRole('Student') && $user->student) {
+            $query->where('student_id', $user->student->id);
+        }
+        
         if ($request->has('search')) {
             $search = $request->get('search');
             $query->where('invoice_number', 'like', "%{$search}%")
@@ -38,6 +43,11 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('Student') && $user->student && $invoice->student_id !== $user->student->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $invoice->load(['student.programme', 'academicSession', 'items.due', 'payments']);
         return view('invoices.show', compact('invoice'));
     }

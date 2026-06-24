@@ -13,16 +13,6 @@ class DefaultUsersSeeder extends Seeder
      */
     public function run(): void
     {
-        // Administrator
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@compssa.edu.gh'],
-            [
-                'name' => 'System Administrator',
-                'password' => Hash::make('password'),
-            ]
-        );
-        $admin->assignRole('Administrator');
-
         // Finance Officer
         $finance = User::firstOrCreate(
             ['email' => 'finance@compssa.edu.gh'],

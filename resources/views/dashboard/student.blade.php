@@ -11,11 +11,11 @@
             <div class="bg-white overflow-hidden shadow-md sm:rounded-2xl p-6 mb-6 border border-azure-100 relative">
                 <!-- Branding Accent -->
                 <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-azure-800 to-azure-400"></div>
-                <h3 class="text-xl font-bold text-azure-950 mt-1">Welcome, {{ $student->first_name ?? 'Student' }}!</h3>
+                <h3 class="text-xl font-bold text-azure-950 mt-1">Welcome, {{ $student?->first_name ?? 'Student' }}!</h3>
                 <p class="text-sm text-azure-600 mt-1.5 font-medium flex flex-wrap gap-2 items-center">
-                    <span class="bg-azure-100 text-azure-800 px-3 py-1 rounded-full text-xs">Programme: {{ $student->programme->name ?? 'N/A' }}</span>
+                    <span class="bg-azure-100 text-azure-800 px-3 py-1 rounded-full text-xs">Programme: {{ $student?->programme?->name ?? 'N/A' }}</span>
                     <span class="text-azure-300">|</span>
-                    <span class="bg-azure-50 text-azure-700 px-3 py-1 rounded-full text-xs border border-azure-100">Level: {{ $student->currentLevel->name ?? 'N/A' }}</span>
+                    <span class="bg-azure-50 text-azure-700 px-3 py-1 rounded-full text-xs border border-azure-100">Level: {{ $student?->currentLevel?->name ?? 'N/A' }}</span>
                 </p>
             </div>
 

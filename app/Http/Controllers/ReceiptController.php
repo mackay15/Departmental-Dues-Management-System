@@ -13,6 +13,11 @@ class ReceiptController extends Controller
         // Load the related entities needed for the receipt
         $payment->load(['invoice.student.programme', 'invoice.student.currentLevel', 'receipt', 'recordedBy']);
 
+        $user = auth()->user();
+        if ($user && $user->hasRole('Student') && $user->student && $payment->invoice->student_id !== $user->student->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         // Generate the PDF
         $pdf = Pdf::loadView('receipts.pdf', compact('payment'));
 

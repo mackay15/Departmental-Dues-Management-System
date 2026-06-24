@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('student')) {
+        if ($user->hasRole('Student')) {
             return $this->studentDashboard($user);
         }
 
@@ -51,12 +51,18 @@ class DashboardController extends Controller
     {
         $student = $user->student;
         
-        $totalOutstanding = Invoice::where('student_id', $student->id)
-                                   ->whereIn('status', ['unpaid', 'partial'])
-                                   ->sum('balance');
-                                   
-        $recentInvoices = Invoice::where('student_id', $student->id)->latest()->take(5)->get();
-        $recentPayments = Payment::where('student_id', $student->id)->latest()->take(5)->get();
+        if (!$student) {
+            $totalOutstanding = 0.00;
+            $recentInvoices = collect();
+            $recentPayments = collect();
+        } else {
+            $totalOutstanding = Invoice::where('student_id', $student->id)
+                                       ->whereIn('status', ['unpaid', 'partial'])
+                                       ->sum('balance');
+                                       
+            $recentInvoices = Invoice::where('student_id', $student->id)->latest()->take(5)->get();
+            $recentPayments = Payment::where('student_id', $student->id)->latest()->take(5)->get();
+        }
 
         return view('dashboard.student', compact(
             'student', 'totalOutstanding', 'recentInvoices', 'recentPayments'

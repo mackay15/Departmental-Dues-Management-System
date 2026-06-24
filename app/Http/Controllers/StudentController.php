@@ -9,6 +9,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Imports\StudentsImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
@@ -97,6 +101,11 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('Student') && $student->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $student->load(['programme', 'currentLevel', 'academicRecords.academicSession', 'academicRecords.academicLevel']);
         return view('students.show', compact('student'));
     }
@@ -169,5 +178,217 @@ class StudentController extends Controller
         $student->update(['status' => 'suspended']);
 
         return redirect()->route('students.index')->with('success', 'Student has been suspended. Academic records are preserved.');
+    }
+
+    /**
+     * Show the bulk student import form.
+     */
+    public function showImportForm()
+    {
+        return view('students.import');
+    }
+
+    /**
+     * Download the standard CSV template for student import.
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="students_import_template.csv"',
+        ];
+
+        $columns = [
+            'student_number',
+            'index_number',
+            'first_name',
+            'last_name',
+            'other_names',
+            'email',
+            'phone',
+            'programme_code',
+            'level_numeric'
+        ];
+
+        $callback = function() use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            
+            // Example row
+            fputcsv($file, [
+                '01234567',
+                '032024001',
+                'John',
+                'Doe',
+                'Kofi',
+                'johndoe@student.edu.gh',
+                '0240000001',
+                'CS', // Code of program
+                '100' // Numeric level
+            ]);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Process the bulk student records import.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xls,xlsx|max:5120', // Max 5MB
+        ]);
+
+        $file = $request->file('file');
+        
+        try {
+            $import = new StudentsImport();
+            Excel::import($import, $file);
+            $rows = $import->getRows();
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error parsing file: ' . $e->getMessage());
+        }
+
+        if (empty($rows)) {
+            return back()->with('error', 'The uploaded file contains no data or the heading row is missing/invalid.');
+        }
+
+        $errors = [];
+        $validatedData = [];
+
+        // Eager load programmes and levels to avoid N+1 queries during validation
+        $programmes = Programme::all()->keyBy('code');
+        $levels = AcademicLevel::all()->keyBy('numeric_value');
+
+        // Track seen identifiers to check for duplicate entries *within* the uploaded file itself
+        $seenStudentNumbers = [];
+        $seenIndexNumbers = [];
+        $seenEmails = [];
+
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2; // +2 because Excel heading is row 1 and index is 0-based
+
+            // Normalize fields (trim spaces)
+            $row = array_map(function($val) {
+                return is_string($val) ? trim($val) : $val;
+            }, $row);
+
+            // Simple required check
+            $requiredFields = ['student_number', 'index_number', 'first_name', 'last_name', 'email', 'programme_code', 'level_numeric'];
+            $missing = [];
+            foreach ($requiredFields as $field) {
+                if (!isset($row[$field]) || $row[$field] === '') {
+                    $missing[] = str_replace('_', ' ', $field);
+                }
+            }
+
+            if (!empty($missing)) {
+                $errors[] = "Row {$rowNum}: Missing required field(s): " . implode(', ', $missing);
+                continue;
+            }
+
+            // Uniqueness in file check
+            if (in_array($row['student_number'], $seenStudentNumbers)) {
+                $errors[] = "Row {$rowNum}: Duplicate Student ID '{$row['student_number']}' found within the file.";
+            }
+            $seenStudentNumbers[] = $row['student_number'];
+
+            if (in_array($row['index_number'], $seenIndexNumbers)) {
+                $errors[] = "Row {$rowNum}: Duplicate Index Number '{$row['index_number']}' found within the file.";
+            }
+            $seenIndexNumbers[] = $row['index_number'];
+
+            if (in_array($row['email'], $seenEmails)) {
+                $errors[] = "Row {$rowNum}: Duplicate Email '{$row['email']}' found within the file.";
+            }
+            $seenEmails[] = $row['email'];
+
+            // Validation rules
+            $validator = Validator::make($row, [
+                'student_number' => 'required|string|unique:students,student_number',
+                'index_number'   => 'required|string|unique:students,index_number',
+                'first_name'     => 'required|string|max:255',
+                'last_name'      => 'required|string|max:255',
+                'other_names'    => 'nullable|string|max:255',
+                'email'          => 'required|email|unique:students,email|unique:users,email',
+                'phone'          => 'nullable|string|max:20',
+            ]);
+
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $err) {
+                    $errors[] = "Row {$rowNum}: {$err}";
+                }
+            }
+
+            // Programme check
+            $progCode = $row['programme_code'];
+            if (!$programmes->has($progCode)) {
+                $errors[] = "Row {$rowNum}: Programme with code '{$progCode}' does not exist.";
+            }
+
+            // Academic Level check
+            $levelVal = $row['level_numeric'];
+            if (!$levels->has($levelVal)) {
+                $errors[] = "Row {$rowNum}: Academic level '{$levelVal}' does not exist.";
+            }
+
+            if (empty($errors)) {
+                $validatedData[] = [
+                    'student_number'   => $row['student_number'],
+                    'index_number'     => $row['index_number'],
+                    'first_name'       => $row['first_name'],
+                    'last_name'        => $row['last_name'],
+                    'other_names'      => $row['other_names'] ?? null,
+                    'email'            => $row['email'],
+                    'phone'            => $row['phone'] ?? null,
+                    'programme_id'     => $programmes->get($progCode)->id,
+                    'current_level_id' => $levels->get($levelVal)->id,
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return back()->withInput()->with('import_errors', $errors);
+        }
+
+        // Database transaction to insert
+        $importedCount = 0;
+        try {
+            DB::transaction(function() use ($validatedData, &$importedCount) {
+                foreach ($validatedData as $data) {
+                    // Create User Account
+                    $user = User::create([
+                        'name' => $data['first_name'] . ' ' . $data['last_name'],
+                        'email' => $data['email'],
+                        'password' => Hash::make($data['student_number']), // Default password is student ID
+                    ]);
+                    $user->assignRole('Student');
+
+                    // Create Student Profile
+                    Student::create([
+                        'student_number' => $data['student_number'],
+                        'index_number' => $data['index_number'],
+                        'first_name' => $data['first_name'],
+                        'last_name' => $data['last_name'],
+                        'other_names' => $data['other_names'],
+                        'email' => $data['email'],
+                        'phone' => $data['phone'],
+                        'programme_id' => $data['programme_id'],
+                        'current_level_id' => $data['current_level_id'],
+                        'status' => 'active',
+                        'user_id' => $user->id,
+                    ]);
+
+                    $importedCount++;
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred during database insertion: ' . $e->getMessage());
+        }
+
+        return redirect()->route('students.index')
+            ->with('success', "Successfully imported {$importedCount} student records.");
     }
 }
