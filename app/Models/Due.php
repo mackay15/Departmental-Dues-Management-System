@@ -29,4 +29,9 @@ class Due extends Model
     {
         return $this->belongsTo(Programme::class);
     }
+
+    public function academicLevel(): BelongsTo
+    {
+        return $this->belongsTo(AcademicLevel::class);
+    }
 }
