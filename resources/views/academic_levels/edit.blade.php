@@ -12,9 +12,9 @@
                     <form method="POST" action="{{ route('academic-levels.update', $academicLevel) }}">
                         @csrf @method('PUT')
                         <div class="mb-4">
-                            <x-input-label for="level_code" :value="__('Level Code')" />
-                            <x-text-input id="level_code" class="block mt-1 w-full" type="text" name="level_code" :value="old('level_code', $academicLevel->level_code)" required autofocus />
-                            <x-input-error :messages="$errors->get('level_code')" class="mt-2" />
+                            <x-input-label for="numeric_value" :value="__('Numeric Value')" />
+                            <x-text-input id="numeric_value" class="block mt-1 w-full" type="number" name="numeric_value" :value="old('numeric_value', $academicLevel->numeric_value)" required autofocus />
+                            <x-input-error :messages="$errors->get('numeric_value')" class="mt-2" />
                         </div>
                         <div class="mb-4">
                             <x-input-label for="name" :value="__('Level Name')" />

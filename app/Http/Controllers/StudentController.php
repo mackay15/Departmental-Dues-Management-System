@@ -261,14 +261,29 @@ class StudentController extends Controller
         // Track seen identifiers to check for duplicate entries *within* the uploaded file itself
         $seenIndexNumbers = [];
         $seenEmails = [];
-
         foreach ($rows as $index => $row) {
             $rowNum = $index + 2; // +2 because Excel heading is row 1 and index is 0-based
 
-            // Normalize fields (trim spaces)
+            // Normalize and cast fields before validation
             $row = array_map(function($val) {
-                return is_string($val) ? trim($val) : $val;
+                return is_string($val) ? trim($val) : (is_null($val) ? null : (string) $val);
             }, $row);
+
+            // Ensure index_number and phone are strings
+            $row['index_number'] = (string) $row['index_number'];
+            if (isset($row['phone'])) {
+                $row['phone'] = (string) $row['phone'];
+            }
+
+            // Normalize programme code to uppercase for case-insensitive matching
+            if (isset($row['programme_code'])) {
+                $row['programme_code'] = strtoupper($row['programme_code']);
+            }
+
+            // Cast level_numeric to integer
+            if (isset($row['level_numeric'])) {
+                $row['level_numeric'] = (int) $row['level_numeric'];
+            }
 
             // Simple required check
             $requiredFields = ['index_number', 'first_name', 'last_name', 'email', 'programme_code', 'level_numeric'];

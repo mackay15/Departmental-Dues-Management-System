@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             DefaultUsersSeeder::class,
+            ProgrammesTableSeeder::class,
+            AcademicLevelsTableSeeder::class,
         ]);
     }
 }

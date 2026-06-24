@@ -22,7 +22,7 @@ class AcademicLevelController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'level_code' => 'required|string|max:50|unique:academic_levels,level_code',
+            'numeric_value' => 'required|integer|unique:academic_levels,numeric_value',
         ]);
 
         AcademicLevel::create($validated);
@@ -39,7 +39,7 @@ class AcademicLevelController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'level_code' => 'required|string|max:50|unique:academic_levels,level_code,'.$academicLevel->id,
+            'numeric_value' => 'required|integer|unique:academic_levels,numeric_value,'.$academicLevel->id,
         ]);
 
         $academicLevel->update($validated);
