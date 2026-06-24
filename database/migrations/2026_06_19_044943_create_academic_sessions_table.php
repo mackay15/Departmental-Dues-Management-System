@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('academic_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // e.g. 2024/2025
+            $table->string('name'); // e.g. 2024/2025
+            $table->string('semester')->default('1'); // e.g. 1, 2
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
