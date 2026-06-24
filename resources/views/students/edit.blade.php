@@ -30,12 +30,6 @@
                         @method('PUT')
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Student ID (Read Only) -->
-                            <div>
-                                <x-input-label for="student_number" :value="__('Student ID Number')" />
-                                <x-text-input id="student_number" class="block mt-1 w-full bg-gray-100" type="text" name="student_number" :value="$student->student_number" readonly />
-                            </div>
-
                             <!-- Index Number (Read Only) -->
                             <div>
                                 <x-input-label for="index_number" :value="__('Index Number')" />

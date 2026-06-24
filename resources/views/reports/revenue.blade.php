@@ -101,7 +101,7 @@
                                             {{ \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-azure-700">
-                                            {{ $payment->student->student_number ?? 'N/A' }}
+                                            {{ $payment->student->index_number ?? 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-azure-900 font-medium">
                                             {{ $payment->student->first_name ?? '' }} {{ $payment->student->last_name ?? '' }}

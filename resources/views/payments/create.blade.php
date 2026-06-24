@@ -22,7 +22,7 @@
                         <div>
                             <p class="text-sm text-gray-500">Billed To</p>
                             <p class="font-bold text-lg">{{ $invoice->student->first_name }} {{ $invoice->student->last_name }}</p>
-                            <p class="text-sm text-gray-500">{{ $invoice->student->student_number }}</p>
+                            <p class="text-sm text-gray-500">{{ $invoice->student->index_number }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-sm text-gray-500">Balance Due</p>

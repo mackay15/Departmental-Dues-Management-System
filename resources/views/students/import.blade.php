@@ -110,7 +110,6 @@
                     <div class="space-y-3">
                         <h4 class="font-bold text-azure-950">Column Requirements:</h4>
                         <ul class="list-disc pl-5 space-y-1.5">
-                            <li><strong>student_number</strong>: Alphanumeric student ID. Must be unique.</li>
                             <li><strong>index_number</strong>: Student index number. Must be unique.</li>
                             <li><strong>first_name & last_name</strong>: Required text columns.</li>
                             <li><strong>email</strong>: Valid email address. Must be unique.</li>
@@ -122,7 +121,7 @@
                     <div class="space-y-3">
                         <h4 class="font-bold text-azure-950">Key System Rules:</h4>
                         <ul class="list-disc pl-5 space-y-1.5">
-                            <li><strong>User Accounts</strong>: The system automatically generates a user login account for each student. The default password is set to their <strong>student_number</strong>.</li>
+                            <li><strong>User Accounts</strong>: The system automatically generates a user login account for each student. The default password is set to their <strong>index_number</strong>.</li>
                             <li><strong>All-Or-Nothing Transaction</strong>: If a single row contains a validation error (such as a duplicate email or invalid programme code), the entire import is rolled back to prevent incomplete records.</li>
                             <li><strong>Dues & Invoicing</strong>: Once imported, students will be ready for invoice generation via the Invoices module.</li>
                         </ul>

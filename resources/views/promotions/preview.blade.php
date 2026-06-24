@@ -143,7 +143,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-azure-950">
-                                                    {{ $student->student_number }}
+                                                    {{ $student->index_number }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-azure-900 font-medium">
                                                     {{ $student->first_name }} {{ $student->last_name }}

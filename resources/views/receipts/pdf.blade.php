@@ -52,8 +52,8 @@
                 <td>{{ $payment->invoice->student->first_name }} {{ $payment->invoice->student->last_name }}</td>
             </tr>
             <tr>
-                <td><strong>Student ID:</strong></td>
-                <td>{{ $payment->invoice->student->student_number }}</td>
+                <td><strong>Index Number:</strong></td>
+                <td>{{ $payment->invoice->student->index_number }}</td>
             </tr>
             <tr>
                 <td><strong>Programme:</strong></td>

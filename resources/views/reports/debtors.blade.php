@@ -97,7 +97,7 @@
                                 @foreach($debtors as $invoice)
                                     <tr class="hover:bg-azure-50/10 transition-colors duration-150">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-azure-950">
-                                            {{ $invoice->student->student_number ?? 'N/A' }}
+                                            {{ $invoice->student->index_number ?? 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-azure-900 font-medium">
                                             {{ $invoice->student->first_name ?? '' }} {{ $invoice->student->last_name ?? '' }}

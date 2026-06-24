@@ -42,7 +42,7 @@
                                             <a href="{{ route('students.show', $payment->invoice->student) }}" class="text-indigo-600 hover:underline">
                                                 {{ $payment->invoice->student->first_name }} {{ $payment->invoice->student->last_name }}
                                             </a>
-                                            <div class="text-xs text-gray-500">{{ $payment->invoice->student->student_number }}</div>
+                                            <div class="text-xs text-gray-500">{{ $payment->invoice->student->index_number }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
                                             GHS {{ number_format($payment->amount, 2) }}

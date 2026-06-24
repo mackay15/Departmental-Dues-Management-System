@@ -50,7 +50,6 @@
 
                         <div>
                             <h3 class="text-lg font-bold border-b pb-2 mb-3">Academic Details</h3>
-                            <p class="mb-1"><span class="font-semibold text-gray-600">Student ID:</span> {{ $student->student_number }}</p>
                             <p class="mb-1"><span class="font-semibold text-gray-600">Index Number:</span> {{ $student->index_number }}</p>
                             <p class="mb-1"><span class="font-semibold text-gray-600">Programme:</span> {{ $student->programme->name ?? 'N/A' }}</p>
                             <p class="mb-1"><span class="font-semibold text-gray-600">Current Level:</span> {{ $student->currentLevel->name ?? 'N/A' }}</p>

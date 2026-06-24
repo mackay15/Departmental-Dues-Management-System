@@ -27,7 +27,7 @@ class PaymentController extends Controller
             $search = $request->get('search');
             $query->where('reference_number', 'like', "%{$search}%")
                   ->orWhereHas('invoice.student', function($q) use ($search) {
-                      $q->where('student_number', 'like', "%{$search}%")
+                      $q->where('index_number', 'like', "%{$search}%")
                         ->orWhere('first_name', 'like', "%{$search}%")
                         ->orWhere('last_name', 'like', "%{$search}%");
                   });

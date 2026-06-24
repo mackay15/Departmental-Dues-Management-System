@@ -46,7 +46,7 @@
                         </div>
                         <div>
                             <p class="font-semibold text-lg">{{ $invoice->student->first_name }} {{ $invoice->student->last_name }}</p>
-                            <p class="text-gray-600 text-sm">ID: {{ $invoice->student->student_number }}</p>
+                            <p class="text-gray-600 text-sm">ID: {{ $invoice->student->index_number }}</p>
                             <p class="text-gray-600 text-sm">Programme: {{ $invoice->student->programme->name ?? 'N/A' }}</p>
                         </div>
                     </div>

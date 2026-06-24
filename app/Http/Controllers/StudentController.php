@@ -25,7 +25,7 @@ class StudentController extends Controller
 
         if ($request->has('search')) {
             $search = $request->get('search');
-            $query->where('student_number', 'like', "%{$search}%")
+            $query->where('index_number', 'like', "%{$search}%")
                   ->orWhere('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%");
         }
@@ -51,7 +51,6 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'student_number' => 'required|string|unique:students,student_number',
             'index_number' => 'required|string|unique:students,index_number',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -73,13 +72,12 @@ class StudentController extends Controller
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['student_number']), // Default password is student number
+            'password' => Hash::make($validated['index_number']), // Default password is index number
         ]);
         $user->assignRole('Student');
 
         // Create Student Profile
         $student = Student::create([
-            'student_number' => $validated['student_number'],
             'index_number' => $validated['index_number'],
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
@@ -199,7 +197,6 @@ class StudentController extends Controller
         ];
 
         $columns = [
-            'student_number',
             'index_number',
             'first_name',
             'last_name',
@@ -216,7 +213,6 @@ class StudentController extends Controller
             
             // Example row
             fputcsv($file, [
-                '01234567',
                 '032024001',
                 'John',
                 'Doe',
@@ -263,7 +259,6 @@ class StudentController extends Controller
         $levels = AcademicLevel::all()->keyBy('numeric_value');
 
         // Track seen identifiers to check for duplicate entries *within* the uploaded file itself
-        $seenStudentNumbers = [];
         $seenIndexNumbers = [];
         $seenEmails = [];
 
@@ -276,7 +271,7 @@ class StudentController extends Controller
             }, $row);
 
             // Simple required check
-            $requiredFields = ['student_number', 'index_number', 'first_name', 'last_name', 'email', 'programme_code', 'level_numeric'];
+            $requiredFields = ['index_number', 'first_name', 'last_name', 'email', 'programme_code', 'level_numeric'];
             $missing = [];
             foreach ($requiredFields as $field) {
                 if (!isset($row[$field]) || $row[$field] === '') {
@@ -290,10 +285,6 @@ class StudentController extends Controller
             }
 
             // Uniqueness in file check
-            if (in_array($row['student_number'], $seenStudentNumbers)) {
-                $errors[] = "Row {$rowNum}: Duplicate Student ID '{$row['student_number']}' found within the file.";
-            }
-            $seenStudentNumbers[] = $row['student_number'];
 
             if (in_array($row['index_number'], $seenIndexNumbers)) {
                 $errors[] = "Row {$rowNum}: Duplicate Index Number '{$row['index_number']}' found within the file.";
@@ -307,7 +298,6 @@ class StudentController extends Controller
 
             // Validation rules
             $validator = Validator::make($row, [
-                'student_number' => 'required|string|unique:students,student_number',
                 'index_number'   => 'required|string|unique:students,index_number',
                 'first_name'     => 'required|string|max:255',
                 'last_name'      => 'required|string|max:255',
@@ -336,7 +326,6 @@ class StudentController extends Controller
 
             if (empty($errors)) {
                 $validatedData[] = [
-                    'student_number'   => $row['student_number'],
                     'index_number'     => $row['index_number'],
                     'first_name'       => $row['first_name'],
                     'last_name'        => $row['last_name'],
@@ -362,13 +351,12 @@ class StudentController extends Controller
                     $user = User::create([
                         'name' => $data['first_name'] . ' ' . $data['last_name'],
                         'email' => $data['email'],
-                        'password' => Hash::make($data['student_number']), // Default password is student ID
+                        'password' => Hash::make($data['index_number']), // Default password is index number
                     ]);
                     $user->assignRole('Student');
 
                     // Create Student Profile
                     Student::create([
-                        'student_number' => $data['student_number'],
                         'index_number' => $data['index_number'],
                         'first_name' => $data['first_name'],
                         'last_name' => $data['last_name'],

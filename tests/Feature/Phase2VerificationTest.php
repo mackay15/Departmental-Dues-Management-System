@@ -41,7 +41,6 @@ class Phase2VerificationTest extends TestCase
 
         $student = Student::create([
             'user_id' => $admin->id,
-            'student_number' => '040920150',
             'index_number' => '040920150A',
             'first_name' => 'John',
             'last_name' => 'Doe',

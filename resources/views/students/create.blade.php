@@ -29,16 +29,10 @@
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Student ID -->
-                            <div>
-                                <x-input-label for="student_number" :value="__('Student ID Number')" />
-                                <x-text-input id="student_number" class="block mt-1 w-full" type="text" name="student_number" :value="old('student_number')" required autofocus />
-                            </div>
-
                             <!-- Index Number -->
                             <div>
                                 <x-input-label for="index_number" :value="__('Index Number')" />
-                                <x-text-input id="index_number" class="block mt-1 w-full" type="text" name="index_number" :value="old('index_number')" required />
+                                <x-text-input id="index_number" class="block mt-1 w-full" type="text" name="index_number" :value="old('index_number')" required autofocus />
                             </div>
 
                             <!-- First Name -->

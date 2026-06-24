@@ -30,7 +30,6 @@ class Phase3VerificationTest extends TestCase
 
         $student1 = Student::create([
             'user_id' => $admin->id,
-            'student_number' => 'STU001',
             'index_number' => 'STU001',
             'first_name' => 'John',
             'last_name' => 'Doe',
@@ -43,7 +42,6 @@ class Phase3VerificationTest extends TestCase
 
         $student2 = Student::create([
             'user_id' => $admin->id,
-            'student_number' => 'STU002',
             'index_number' => 'STU002',
             'first_name' => 'Jane',
             'last_name' => 'Smith',
@@ -129,7 +127,6 @@ class Phase3VerificationTest extends TestCase
 
         $student = Student::create([
             'user_id' => $user->id,
-            'student_number' => 'STU999',
             'index_number' => 'STU999',
             'first_name' => 'Alex',
             'last_name' => 'Jones',

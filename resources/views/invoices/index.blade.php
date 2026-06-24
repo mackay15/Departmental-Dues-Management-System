@@ -64,7 +64,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $invoice->student->first_name }} {{ $invoice->student->last_name }}
-                                            <div class="text-xs text-gray-500">{{ $invoice->student->student_number }}</div>
+                                            <div class="text-xs text-gray-500">{{ $invoice->student->index_number }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $invoice->academicSession->name }}

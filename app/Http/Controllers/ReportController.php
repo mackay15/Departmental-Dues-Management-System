@@ -69,7 +69,7 @@ class ReportController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['Student Number', 'Name', 'Programme', 'Session', 'Invoice Total', 'Paid', 'Balance'];
+        $columns = ['Index Number', 'Name', 'Programme', 'Session', 'Invoice Total', 'Paid', 'Balance'];
 
         $callback = function() use($debtors, $columns) {
             $file = fopen('php://output', 'w');
@@ -77,7 +77,7 @@ class ReportController extends Controller
 
             foreach ($debtors as $invoice) {
                 $row = [
-                    $invoice->student->student_number,
+                    $invoice->student->index_number,
                     $invoice->student->first_name . ' ' . $invoice->student->last_name,
                     $invoice->student->programme->name ?? 'N/A',
                     $invoice->academicSession->name ?? 'N/A',
@@ -104,7 +104,7 @@ class ReportController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['Receipt No', 'Date', 'Student Number', 'Name', 'Session', 'Amount'];
+        $columns = ['Receipt No', 'Date', 'Index Number', 'Name', 'Session', 'Amount'];
 
         $callback = function() use($payments, $columns) {
             $file = fopen('php://output', 'w');
@@ -114,7 +114,7 @@ class ReportController extends Controller
                 $row = [
                     $payment->receipt_number ?? 'N/A',
                     $payment->payment_date,
-                    $payment->student->student_number ?? 'N/A',
+                    $payment->student->index_number ?? 'N/A',
                     $payment->student->first_name . ' ' . $payment->student->last_name,
                     $payment->invoice->academicSession->name ?? 'N/A',
                     $payment->amount
