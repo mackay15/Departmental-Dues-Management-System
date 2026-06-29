@@ -4,6 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Students') }}
             </h2>
+            @role('HOD')
             <div class="flex space-x-2">
                 <a href="{{ route('students.import') }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 focus:bg-emerald-700 active:bg-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     Import Students
@@ -12,6 +13,7 @@
                     Register Student
                 </a>
             </div>
+            @endrole
         </div>
     </x-slot>
 
@@ -75,7 +77,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('students.show', $student) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
+                                            @role('HOD')
                                             <a href="{{ route('students.edit', $student) }}" class="text-gray-600 hover:text-gray-900">Edit</a>
+                                            @endrole
                                         </td>
                                     </tr>
                                 @empty

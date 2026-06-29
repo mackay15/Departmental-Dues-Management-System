@@ -35,12 +35,22 @@ Route::middleware('auth')->group(function () {
 
     // Staff Only Routes (Admins, HODs, Finance, Auditors)
     Route::middleware('non_student')->group(function () {
-        // Students Import Routes
-        Route::get('students/import', [StudentController::class, 'showImportForm'])->name('students.import');
-        Route::post('students/import', [StudentController::class, 'import'])->name('students.import.store');
-        Route::get('students/import-template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
+        // Students index is accessible to all staff
+        Route::get('students', [StudentController::class, 'index'])->name('students.index');
 
-        Route::resource('students', StudentController::class)->except(['show']);
+        // Student registration, editing, and importing are restricted to HOD only
+        Route::middleware('role:HOD')->group(function () {
+            Route::get('students/import', [StudentController::class, 'showImportForm'])->name('students.import');
+            Route::post('students/import', [StudentController::class, 'import'])->name('students.import.store');
+            Route::get('students/import-template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
+
+            Route::get('students/create', [StudentController::class, 'create'])->name('students.create');
+            Route::post('students', [StudentController::class, 'store'])->name('students.store');
+            Route::get('students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
+            Route::match(['put', 'patch'], 'students/{student}', [StudentController::class, 'update'])->name('students.update');
+            Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+        });
+
         Route::resource('academic-sessions', AcademicSessionController::class);
         Route::resource('dues', DueController::class);
 

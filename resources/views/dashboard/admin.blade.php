@@ -1,7 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-azure-800 leading-tight tracking-tight">
-            {{ __('HOD Dashboard') }}
+            @if(auth()->user()->hasRole('HOD'))
+                {{ __('HOD Dashboard') }}
+            @elseif(auth()->user()->hasRole('Finance Officer'))
+                {{ __('Finance Dashboard') }}
+            @elseif(auth()->user()->hasRole('Auditor'))
+                {{ __('Auditor Dashboard') }}
+            @else
+                {{ __('Staff Dashboard') }}
+            @endif
         </h2>
     </x-slot>
 
