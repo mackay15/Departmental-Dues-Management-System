@@ -104,8 +104,7 @@ class Phase2VerificationTest extends TestCase
         $receipt = Receipt::where('payment_id', $payment->id)->first();
         $this->assertNotNull($receipt);
 
-        $response = $this->actingAs($admin)->get(route('receipts.download', $payment->id));
+        $response = $this->actingAs($admin)->get(route('receipts.print', $payment->id));
         $response->assertStatus(200);
-        $response->assertHeader('content-type', 'application/pdf');
     }
 }

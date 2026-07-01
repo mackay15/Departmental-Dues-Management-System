@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+use App\Traits\LogsActivity;
+
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'invoice_id',
@@ -27,9 +29,16 @@ class Payment extends Model
         return $this->belongsTo(Invoice::class);
     }
 
-    public function student(): BelongsTo
+    public function student(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
     {
-        return $this->belongsTo(Student::class);
+        return $this->hasOneThrough(
+            Student::class,
+            Invoice::class,
+            'id',          // Foreign key on invoices table (invoice.id)
+            'id',          // Foreign key on students table (student.id)
+            'invoice_id',  // Local key on payments table
+            'student_id'   // Local key on invoices table
+        );
     }
 
     public function recordedBy(): BelongsTo

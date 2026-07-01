@@ -37,6 +37,35 @@ class PaymentController extends Controller
         return view('payments.index', compact('payments'));
     }
 
+    public function record(Request $request)
+    {
+        $student = null;
+        $invoices = collect();
+
+        if ($request->has('index_number')) {
+            $validated = $request->validate([
+                'index_number' => 'required|string',
+            ]);
+
+            $student = \App\Models\Student::with('programme', 'currentLevel')
+                ->where('index_number', $validated['index_number'])
+                ->first();
+
+            if ($student) {
+                // Get pending invoices
+                $invoices = $student->invoices()
+                    ->with(['academicSession', 'items.due'])
+                    ->whereIn('status', ['unpaid', 'partial'])
+                    ->latest()
+                    ->get();
+            } else {
+                return back()->with('error', 'Student with this Index Number not found.');
+            }
+        }
+
+        return view('payments.record', compact('student', 'invoices'));
+    }
+
     public function create(Invoice $invoice)
     {
         if ($invoice->balance <= 0) {

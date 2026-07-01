@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,7 +42,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('email', 'password');
+
+        // If the 'email' input is not a valid email address, assume it might be a student index number.
+        if (!filter_var($credentials['email'], FILTER_VALIDATE_EMAIL)) {
+            $student = \App\Models\Student::where('index_number', $credentials['email'])->first();
+            if ($student && $student->user) {
+                $credentials['email'] = $student->user->email;
+            }
+        }
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

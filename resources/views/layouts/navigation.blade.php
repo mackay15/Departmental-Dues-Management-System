@@ -67,11 +67,22 @@
             <!-- Payments -->
             @hasanyrole('HOD|Finance Officer|Auditor|Student')
             <a href="{{ route('payments.index') }}" 
-               class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.*') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
-                <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.*') ? 'text-azure-400' : 'text-azure-300 group-hover:text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+               class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.index') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.index') ? 'text-azure-400' : 'text-azure-300 group-hover:text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                <span>Payments</span>
+                <span>Payments History</span>
+            </a>
+            @endhasanyrole
+
+            <!-- Record Payment -->
+            @hasanyrole('HOD|Finance Officer')
+            <a href="{{ route('payments.record') }}" 
+               class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.record') || request()->routeIs('payments.create') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.record') || request()->routeIs('payments.create') ? 'text-azure-400' : 'text-azure-300 group-hover:text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>Record Payment</span>
             </a>
             @endhasanyrole
 
@@ -96,6 +107,17 @@
                 <span>Reports</span>
             </a>
             @endhasanyrole
+
+            <!-- Activity Logs -->
+            @role('Auditor')
+            <a href="{{ route('auditor.logs') }}" 
+               class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('auditor.logs') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('auditor.logs') ? 'text-azure-400' : 'text-azure-300 group-hover:text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Activity Logs</span>
+            </a>
+            @endrole
 
             <!-- Users -->
             @role('HOD')
@@ -262,11 +284,22 @@
                 <!-- Payments -->
                 @hasanyrole('HOD|Finance Officer|Auditor|Student')
                 <a href="{{ route('payments.index') }}" 
-                   class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.*') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
-                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.*') ? 'text-azure-400' : 'text-azure-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                   class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.index') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.index') ? 'text-azure-400' : 'text-azure-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    <span>Payments</span>
+                    <span>Payments History</span>
+                </a>
+                @endhasanyrole
+
+                <!-- Record Payment -->
+                @hasanyrole('HOD|Finance Officer')
+                <a href="{{ route('payments.record') }}" 
+                   class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('payments.record') || request()->routeIs('payments.create') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('payments.record') || request()->routeIs('payments.create') ? 'text-azure-400' : 'text-azure-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span>Record Payment</span>
                 </a>
                 @endhasanyrole
 
@@ -291,6 +324,17 @@
                     <span>Reports</span>
                 </a>
                 @endhasanyrole
+
+                <!-- Activity Logs -->
+                @role('Auditor')
+                <a href="{{ route('auditor.logs') }}" 
+                   class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('auditor.logs') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
+                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('auditor.logs') ? 'text-azure-400' : 'text-azure-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Activity Logs</span>
+                </a>
+                @endrole
 
                 <!-- Users -->
                 @role('HOD')

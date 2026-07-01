@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::get('payments/{payment}/receipt', [ReceiptController::class, 'download'])->name('receipts.download');
+    Route::get('payments/{payment}/receipt', [ReceiptController::class, 'print'])->name('receipts.print');
 
     // Student Self-Service Payment Routes
     Route::get('invoices/{invoice}/pay', [\App\Http\Controllers\StudentPaymentController::class, 'showPayForm'])->name('student.payments.pay');
@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::post('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.store_generation');
         
         // Payments Routes
+        Route::get('payments/record', [PaymentController::class, 'record'])->name('payments.record');
         Route::get('invoices/{invoice}/payments/create', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
         
@@ -83,6 +84,11 @@ Route::middleware('auth')->group(function () {
             Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
             Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
             Route::patch('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        });
+        // Auditor-only routes
+        Route::middleware('role:Auditor|HOD')->group(function () {
+            Route::get('auditor/logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('auditor.logs');
+            Route::get('auditor/logs/print', [\App\Http\Controllers\ActivityLogController::class, 'print'])->name('auditor.logs.print');
         });
     });
 

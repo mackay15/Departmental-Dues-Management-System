@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Traits\LogsActivity;
+
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'index_number',
@@ -50,8 +52,8 @@ class Student extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function payments(): HasMany
+    public function payments(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasManyThrough(Payment::class, Invoice::class);
     }
 }

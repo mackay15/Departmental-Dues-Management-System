@@ -37,6 +37,65 @@
                 </div>
             @endif
 
+            @if (session('imported_students_credentials'))
+                <div class="bg-white overflow-hidden shadow-md sm:rounded-2xl border border-azure-100 p-8 space-y-4">
+                    <div class="flex items-center justify-between border-b border-azure-50 pb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-azure-950">Imported Student Credentials</h3>
+                            <p class="text-xs text-azure-500">Provide these temporary login credentials to the students. They will be forced to set a new password on their first login.</p>
+                        </div>
+                        <button onclick="downloadCredentialsCSV()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow transition duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download Credentials CSV
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-azure-100 text-sm text-left">
+                            <thead class="bg-azure-50/50 text-azure-800 font-semibold">
+                                <tr>
+                                    <th class="px-6 py-3">Index Number</th>
+                                    <th class="px-6 py-3">Name</th>
+                                    <th class="px-6 py-3">Email Address</th>
+                                    <th class="px-6 py-3">Temporary Password</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-azure-50 text-azure-900">
+                                @foreach (session('imported_students_credentials') as $cred)
+                                    <tr class="hover:bg-azure-50/20">
+                                        <td class="px-6 py-4 font-mono font-bold">{{ $cred['index_number'] }}</td>
+                                        <td class="px-6 py-4">{{ $cred['name'] }}</td>
+                                        <td class="px-6 py-4">{{ $cred['email'] }}</td>
+                                        <td class="px-6 py-4"><code class="px-2 py-1 bg-amber-50 text-amber-800 rounded border border-amber-200 font-bold select-all font-mono">{{ $cred['temp_password'] }}</code></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <script>
+                    function downloadCredentialsCSV() {
+                        const data = @json(session('imported_students_credentials'));
+                        let csvContent = "data:text/csv;charset=utf-8,";
+                        csvContent += "Index Number,Name,Email Address,Temporary Password\n";
+                        
+                        data.forEach(function(row) {
+                            csvContent += `"${row.index_number}","${row.name}","${row.email}","${row.temp_password}"\n`;
+                        });
+                        
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", "imported_students_credentials.csv");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                </script>
+            @endif
+
             <!-- Validation Errors Grouped by Row -->
             @if (session('import_errors'))
                 <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 p-6 rounded-xl shadow-sm space-y-2">
@@ -121,7 +180,7 @@
                     <div class="space-y-3">
                         <h4 class="font-bold text-azure-950">Key System Rules:</h4>
                         <ul class="list-disc pl-5 space-y-1.5">
-                            <li><strong>User Accounts</strong>: The system automatically generates a user login account for each student. The default password is set to their <strong>index_number</strong>.</li>
+                            <li><strong>User Accounts</strong>: The system automatically generates a user login account for each student. A secure random <strong>One-Time Password (OTP)</strong> is generated, and they will be prompted to reset it on their first login.</li>
                             <li><strong>All-Or-Nothing Transaction</strong>: If a single row contains a validation error (such as a duplicate email or invalid programme code), the entire import is rolled back to prevent incomplete records.</li>
                             <li><strong>Dues & Invoicing</strong>: Once imported, students will be ready for invoice generation via the Invoices module.</li>
                         </ul>

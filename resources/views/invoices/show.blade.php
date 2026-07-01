@@ -135,7 +135,7 @@
                                         <span>Ref: {{ $payment->reference_number }}</span>
                                     </div>
                                     <div class="mt-2 text-right">
-                                        <a href="{{ route('receipts.download', $payment) }}" class="text-xs text-indigo-600 hover:text-indigo-900" target="_blank">Download Receipt</a>
+                                        <a href="{{ route('receipts.print', $payment) }}" class="text-xs text-indigo-600 hover:text-indigo-900" target="_blank">Print Receipt</a>
                                     </div>
                                 </li>
                             @endforeach

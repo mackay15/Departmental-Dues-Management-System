@@ -69,10 +69,12 @@ class StudentController extends Controller
         }
 
         // Create User Account for Student
+        $tempPassword = \Illuminate\Support\Str::random(10);
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['index_number']), // Default password is index number
+            'password' => Hash::make($tempPassword),
+            'must_change_password' => true,
         ]);
         $user->assignRole('Student');
 
@@ -91,7 +93,7 @@ class StudentController extends Controller
             'user_id' => $user->id,
         ]);
 
-        return redirect()->route('students.index')->with('success', 'Student registered successfully.');
+        return redirect()->route('students.index')->with('success', 'Student registered successfully. Temporary Password for initial login: ' . $tempPassword);
     }
 
     /**
@@ -359,14 +361,18 @@ class StudentController extends Controller
 
         // Database transaction to insert
         $importedCount = 0;
+        $importedCredentials = [];
         try {
-            DB::transaction(function() use ($validatedData, &$importedCount) {
+            DB::transaction(function() use ($validatedData, &$importedCount, &$importedCredentials) {
                 foreach ($validatedData as $data) {
+                    $tempPassword = \Illuminate\Support\Str::random(10);
+
                     // Create User Account
                     $user = User::create([
                         'name' => $data['first_name'] . ' ' . $data['last_name'],
                         'email' => $data['email'],
-                        'password' => Hash::make($data['index_number']), // Default password is index number
+                        'password' => Hash::make($tempPassword),
+                        'must_change_password' => true,
                     ]);
                     $user->assignRole('Student');
 
@@ -384,6 +390,13 @@ class StudentController extends Controller
                         'user_id' => $user->id,
                     ]);
 
+                    $importedCredentials[] = [
+                        'index_number' => $data['index_number'],
+                        'name' => $data['first_name'] . ' ' . $data['last_name'],
+                        'email' => $data['email'],
+                        'temp_password' => $tempPassword,
+                    ];
+
                     $importedCount++;
                 }
             });
@@ -391,7 +404,9 @@ class StudentController extends Controller
             return back()->with('error', 'An error occurred during database insertion: ' . $e->getMessage());
         }
 
-        return redirect()->route('students.index')
-            ->with('success', "Successfully imported {$importedCount} student records.");
+        session()->flash('imported_students_credentials', $importedCredentials);
+
+        return redirect()->route('students.import')
+            ->with('success', "Successfully imported {$importedCount} student records. Please review and copy/download the generated temporary passwords below.");
     }
 }

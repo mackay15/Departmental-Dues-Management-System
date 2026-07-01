@@ -8,10 +8,10 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
+        <!-- Email Address or Index Number -->
         <div>
-            <x-input-label for="email" :value="__('Email Address')" class="text-azure-800 font-medium" />
-            <x-text-input id="email" class="block mt-1 w-full rounded-lg border-azure-200 focus:border-azure-400 focus:ring-azure-400" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="you@example.com" />
+            <x-input-label for="email" :value="__('Email Address or Index Number')" class="text-azure-800 font-medium" />
+            <x-text-input id="email" class="block mt-1 w-full rounded-lg border-azure-200 focus:border-azure-400 focus:ring-azure-400" type="text" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="you@example.com or Index Number" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 

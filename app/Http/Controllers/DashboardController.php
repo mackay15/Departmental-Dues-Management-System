@@ -61,7 +61,7 @@ class DashboardController extends Controller
                                        ->sum('balance');
                                        
             $recentInvoices = Invoice::where('student_id', $student->id)->latest()->take(5)->get();
-            $recentPayments = Payment::where('student_id', $student->id)->latest()->take(5)->get();
+            $recentPayments = $student->payments()->latest()->take(5)->get();
         }
 
         return view('dashboard.student', compact(
