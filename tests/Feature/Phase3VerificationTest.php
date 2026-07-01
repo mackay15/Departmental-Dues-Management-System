@@ -152,17 +152,27 @@ class Phase3VerificationTest extends TestCase
         $response = $this->actingAs($user)->get(route('student.payments.pay', $invoice));
         $response->assertStatus(200);
 
-        // 3. Process the MoMo payment
-        $response = $this->actingAs($user)->post(route('student.payments.process', $invoice), [
-            'amount' => 120.00,
-            'payment_method' => 'momo',
-            'momo_provider' => 'mtn',
-            'momo_number' => '0241234567',
+        // 3. Mock Paystack verification call
+        \Illuminate\Support\Facades\Http::fake([
+            'api.paystack.co/transaction/verify/*' => \Illuminate\Support\Facades\Http::response([
+                'status' => true,
+                'data' => [
+                    'status' => 'success',
+                    'amount' => 12000, // 120.00 GHS in pesewas
+                    'channel' => 'mobile_money',
+                ]
+            ], 200)
         ]);
+
+        // 4. Verify the payment via callback
+        $response = $this->actingAs($user)->get(route('student.payments.verify', [
+            'invoice' => $invoice,
+            'reference' => 'PAYSTACK-REF-12345',
+        ]));
 
         $response->assertRedirect(route('invoices.show', $invoice));
         
-        // 4. Verify payment database status
+        // 5. Verify database records
         $invoice->refresh();
         $this->assertEquals(120.00, $invoice->paid_amount);
         $this->assertEquals(0.00, $invoice->balance);
@@ -171,8 +181,9 @@ class Phase3VerificationTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'invoice_id' => $invoice->id,
             'amount' => 120.00,
-            'payment_method' => 'momo',
+            'payment_method' => 'paystack',
             'recorded_by' => $user->id,
+            'reference_number' => 'PAYSTACK-REF-12345',
         ]);
 
         $this->assertDatabaseHas('receipts', [

@@ -8,10 +8,15 @@ use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class StudentPaymentController extends Controller
 {
+    /**
+     * Show the Paystack checkout page for an invoice.
+     */
     public function showPayForm(Invoice $invoice)
     {
         $user = auth()->user();
@@ -23,81 +28,80 @@ class StudentPaymentController extends Controller
             return redirect()->route('invoices.show', $invoice)->with('info', 'This invoice is already fully paid.');
         }
 
-        return view('student.payments.pay', compact('invoice'));
+        $invoice->load(['student', 'academicSession', 'items.due']);
+
+        $paystackPublicKey = config('services.paystack.public_key');
+        $currency          = config('services.paystack.currency', 'GHS');
+
+        return view('student.payments.pay', compact('invoice', 'paystackPublicKey', 'currency'));
     }
 
-    public function processPayment(Request $request, Invoice $invoice)
+    /**
+     * Verify a completed Paystack transaction and record the payment.
+     */
+    public function verifyPayment(Request $request, Invoice $invoice)
     {
         $user = auth()->user();
         if (!$user || !$user->hasRole('Student') || !$user->student || $invoice->student_id !== $user->student->id) {
             abort(403, 'Unauthorized action.');
         }
 
-        if ($invoice->balance <= 0) {
-            return redirect()->route('invoices.show', $invoice)->with('error', 'Invoice is already fully paid.');
+        $reference = $request->query('reference') ?? $request->input('reference');
+
+        if (!$reference) {
+            return redirect()->route('invoices.show', $invoice)->with('error', 'No payment reference found. Please try again.');
         }
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:1|max:' . $invoice->balance,
-            'payment_method' => 'required|string|in:momo,card',
-            
-            // MoMo Validation
-            'momo_provider' => 'required_if:payment_method,momo|nullable|string|in:mtn,telecel,at',
-            'momo_number' => 'required_if:payment_method,momo|nullable|string|regex:/^[0-9]{10}$/',
-            
-            // Card Validation
-            'card_number' => 'required_if:payment_method,card|nullable|string|regex:/^[0-9]{16}$/',
-            'card_expiry' => 'required_if:payment_method,card|nullable|string|regex:/^(0[1-9]|1[0-2])\/[0-9]{2}$/',
-            'card_cvv' => 'required_if:payment_method,card|nullable|string|regex:/^[0-9]{3}$/',
-        ], [
-            'momo_number.regex' => 'The mobile money number must be exactly 10 digits.',
-            'card_number.regex' => 'The card number must be exactly 16 digits.',
-            'card_expiry.regex' => 'The expiry date must be in MM/YY format.',
-            'card_cvv.regex' => 'The CVV must be exactly 3 digits.',
-        ]);
-
-        $refPrefix = strtoupper($validated['payment_method']);
-        $refNumber = $refPrefix . '-' . strtoupper(Str::random(10));
-        
-        $notes = '';
-        if ($validated['payment_method'] === 'momo') {
-            $notes = 'Momo payment via ' . strtoupper($validated['momo_provider']) . ' (' . $validated['momo_number'] . ')';
-        } else {
-            $maskedCard = 'XXXX-XXXX-XXXX-' . substr($validated['card_number'], -4);
-            $notes = 'Card payment via ' . $maskedCard;
+        // Prevent duplicate processing of the same reference
+        if (Payment::where('reference_number', $reference)->exists()) {
+            return redirect()->route('invoices.show', $invoice)->with('info', 'This payment has already been recorded.');
         }
 
-        DB::transaction(function () use ($validated, $invoice, $refNumber, $notes) {
+        // Verify with Paystack API
+        $response = Http::withToken(config('services.paystack.secret_key'))
+            ->get("https://api.paystack.co/transaction/verify/{$reference}");
+
+        if (!$response->successful()) {
+            Log::error('Paystack verification request failed', ['reference' => $reference, 'status' => $response->status()]);
+            return redirect()->route('invoices.show', $invoice)->with('error', 'Could not reach payment gateway. Please contact support.');
+        }
+
+        $data = $response->json();
+
+        if (!($data['status'] ?? false) || ($data['data']['status'] ?? '') !== 'success') {
+            return redirect()->route('invoices.show', $invoice)->with('error', 'Payment was not successful. No charges have been made.');
+        }
+
+        // Amount from Paystack is in pesewas (GHS) — convert back to cedis
+        $amountPaid = $data['data']['amount'] / 100;
+
+        // Clamp to actual balance (safety net)
+        $amountPaid = min($amountPaid, $invoice->balance);
+
+        DB::transaction(function () use ($amountPaid, $invoice, $reference, $data) {
             $payment = Payment::create([
-                'invoice_id' => $invoice->id,
-                'amount' => $validated['amount'],
-                'payment_date' => now(),
-                'payment_method' => $validated['payment_method'],
-                'reference_number' => $refNumber,
-                'recorded_by' => Auth::id(),
-                'notes' => $notes,
-                'status' => 'completed',
+                'invoice_id'       => $invoice->id,
+                'amount'           => $amountPaid,
+                'payment_date'     => now(),
+                'payment_method'   => 'paystack',
+                'reference_number' => $reference,
+                'recorded_by'      => Auth::id(),
+                'notes'            => 'Paystack online payment. Channel: ' . ($data['data']['channel'] ?? 'online'),
+                'status'           => 'completed',
             ]);
 
-            // Generate a Receipt
             Receipt::create([
-                'payment_id' => $payment->id,
+                'payment_id'     => $payment->id,
                 'receipt_number' => 'RCT-' . strtoupper(Str::random(8)),
-                'issued_by' => null, // Self-service online payment
+                'issued_by'      => null,
             ]);
 
-            // Update Invoice totals
-            $invoice->paid_amount += $validated['amount'];
-            $invoice->balance -= $validated['amount'];
-            
-            if ($invoice->balance <= 0) {
-                $invoice->status = 'paid';
-            } else {
-                $invoice->status = 'partial';
-            }
+            $invoice->paid_amount += $amountPaid;
+            $invoice->balance     -= $amountPaid;
+            $invoice->status       = $invoice->balance <= 0 ? 'paid' : 'partial';
             $invoice->save();
         });
 
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Your online payment was completed successfully!');
+        return redirect()->route('invoices.show', $invoice)->with('success', 'Payment of GHS ' . number_format($amountPaid, 2) . ' received successfully via Paystack!');
     }
 }
