@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::resource('academic-sessions', AcademicSessionController::class);
-        Route::resource('dues', DueController::class)->only(['index', 'show']);
+        Route::resource('dues', DueController::class)->only(['index']);
 
         // HOD-only infrastructure management routes
         Route::middleware('role:HOD')->group(function () {
