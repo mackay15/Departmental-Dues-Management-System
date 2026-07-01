@@ -16,13 +16,26 @@
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
+        <div class="mt-4" x-data="{ showPassword: false }">
             <x-input-label for="password" :value="__('Password')" class="text-azure-800 font-medium" />
-            <x-text-input id="password" class="block mt-1 w-full rounded-lg border-azure-200 focus:border-azure-400 focus:ring-azure-400"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password"
-                            placeholder="••••••••" />
+            <div class="relative mt-1">
+                <x-text-input id="password" class="block w-full rounded-lg border-azure-200 focus:border-azure-400 focus:ring-azure-400 pr-10"
+                                x-bind:type="showPassword ? 'text' : 'password'"
+                                name="password"
+                                required autocomplete="current-password"
+                                placeholder="••••••••" />
+                <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-azure-600 hover:text-azure-800 focus:outline-none">
+                    <!-- Eye Icon (when password is hidden) -->
+                    <svg x-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <!-- Eye Off Icon (when password is visible) -->
+                    <svg x-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.025 10.025 0 014.132-5.4M9.69 9.69a3 3 0 004.62 4.62M4.93 4.93l14.14 14.14M15.47 15.47A9.973 9.973 0 0019.542 12c-1.274-4.057-5.064-7-9.542-7-1.189 0-2.32.206-3.37.585" />
+                    </svg>
+                </button>
+            </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
