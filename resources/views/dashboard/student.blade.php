@@ -29,6 +29,21 @@
                             <div class="mt-2 text-3xl font-extrabold {{ $totalOutstanding > 0 ? 'text-rose-600' : 'text-emerald-600' }}">
                                 GHS {{ number_format($totalOutstanding, 2) }}
                             </div>
+                            @if($totalOutstanding > 0)
+                                @php
+                                    $firstPending = $recentInvoices->first(fn($inv) => $inv->status !== 'paid');
+                                @endphp
+                                @if($firstPending)
+                                    <div class="mt-3">
+                                        <a href="{{ route('student.payments.pay', $firstPending) }}" class="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm hover:shadow active:scale-95">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                            Pay Outstanding Dues
+                                        </a>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                         <div class="p-3 {{ $totalOutstanding > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }} rounded-xl">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,10 +136,19 @@
                             <div class="flex justify-between items-center border-b border-azure-50 pb-3 hover:bg-azure-50/20 px-2 rounded-lg transition-colors duration-150">
                                 <div>
                                     <p class="text-sm font-semibold text-azure-950">{{ \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y') }}</p>
-                                    <p class="text-xs text-azure-500 mt-1">Receipt: <span class="font-mono text-azure-700 bg-azure-50 px-1.5 py-0.5 rounded text-[10px] border border-azure-100">{{ $payment->receipt_number ?? 'N/A' }}</span></p>
+                                    <p class="text-xs text-azure-500 mt-1">Receipt: <span class="font-mono text-azure-700 bg-azure-50 px-1.5 py-0.5 rounded text-[10px] border border-azure-100">{{ $payment->receipt->receipt_number ?? 'N/A' }}</span></p>
                                 </div>
-                                <div class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                                    GHS {{ number_format($payment->amount, 2) }}
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                                        GHS {{ number_format($payment->amount, 2) }}
+                                    </div>
+                                    @if($payment->receipt)
+                                        <a href="{{ route('receipts.print', $payment) }}" target="_blank" class="text-azure-600 hover:text-azure-800 p-1.5 bg-azure-50 hover:bg-azure-100 rounded-lg transition-colors border border-azure-100" title="Print Receipt">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                            </svg>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         @empty

@@ -22,7 +22,9 @@ class Phase2VerificationTest extends TestCase
     public function test_phase2_workflow(): void
     {
         // Setup Prerequisite Data
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $admin = User::factory()->create();
+        $admin->assignRole('HOD');
         
         $session = AcademicSession::create([
             'name' => '2023/2024',

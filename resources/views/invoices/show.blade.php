@@ -9,13 +9,21 @@
                     Invoice {{ $invoice->invoice_number }}
                 </h2>
             </div>
-            <div>
+            <div class="flex items-center space-x-2">
+                @hasanyrole('HOD|Finance Officer')
+                <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-800">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print Invoice
+                </a>
+                @endhasanyrole
                 @if($invoice->status !== 'paid')
                     @if(auth()->user()->hasRole('Student'))
                         <a href="{{ route('student.payments.pay', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-azure-800 to-azure-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-azure-900 hover:to-azure-700 shadow-md">
                             Pay Now
                         </a>
-                    @else
+                    @elseif(auth()->user()->hasAnyRole(['HOD', 'Finance Officer']))
                         <a href="{{ route('payments.create', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
                             Record Payment
                         </a>

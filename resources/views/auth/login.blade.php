@@ -46,11 +46,5 @@
             </button>
         </div>
 
-        @if (Route::has('register'))
-            <p class="text-center text-sm text-azure-600 mt-6">
-                Don't have an account?
-                <a href="{{ route('register') }}" class="font-semibold text-azure-800 hover:text-azure-600 transition-colors">Create one</a>
-            </p>
-        @endif
     </form>
 </x-guest-layout>

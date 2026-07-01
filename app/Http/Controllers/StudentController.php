@@ -102,7 +102,11 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $user = auth()->user();
-        if ($user && $user->hasRole('Student') && $student->user_id !== $user->id) {
+        if ($user->hasAnyRole(['HOD', 'Auditor'])) {
+            // Authorized
+        } elseif ($user->hasRole('Student') && $student->user_id === $user->id) {
+            // Authorized
+        } else {
             abort(403, 'Unauthorized action.');
         }
 

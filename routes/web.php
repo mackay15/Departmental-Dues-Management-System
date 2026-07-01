@@ -35,11 +35,9 @@ Route::middleware('auth')->group(function () {
 
     // Staff Only Routes (Admins, HODs, Finance, Auditors)
     Route::middleware('non_student')->group(function () {
-        // Students index is accessible to all staff
-        Route::get('students', [StudentController::class, 'index'])->name('students.index');
-
-        // Student registration, editing, and importing are restricted to HOD only
+        // Student registration, editing, importing and list are restricted to HOD only
         Route::middleware('role:HOD')->group(function () {
+            Route::get('students', [StudentController::class, 'index'])->name('students.index');
             Route::get('students/import', [StudentController::class, 'showImportForm'])->name('students.import');
             Route::post('students/import', [StudentController::class, 'import'])->name('students.import.store');
             Route::get('students/import-template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
@@ -52,20 +50,22 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::resource('academic-sessions', AcademicSessionController::class);
-        Route::resource('dues', DueController::class);
+        Route::resource('dues', DueController::class)->only(['index', 'show']);
 
         // HOD-only infrastructure management routes
         Route::middleware('role:HOD')->group(function () {
             Route::resource('programmes', ProgrammeController::class);
             Route::resource('academic-levels', AcademicLevelController::class);
+            Route::resource('dues', DueController::class)->except(['index', 'show']);
+
+            // Invoices Generation - HOD only
+            Route::get('invoices/generate', [InvoiceController::class, 'createGenerationForm'])->name('invoices.generate');
+            Route::post('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.store_generation');
         });
-        
-        // Invoices Routes
-        Route::get('invoices/generate', [InvoiceController::class, 'createGenerationForm'])->name('invoices.generate');
-        Route::post('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.store_generation');
         
         // Payments Routes
         Route::get('payments/record', [PaymentController::class, 'record'])->name('payments.record');
+        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('invoices/{invoice}/payments/create', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
         

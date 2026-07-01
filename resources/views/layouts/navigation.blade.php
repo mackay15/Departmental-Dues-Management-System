@@ -21,7 +21,7 @@
             </a>
 
             <!-- Students -->
-            @hasanyrole('HOD|Finance Officer')
+            @role('HOD')
             <a href="{{ route('students.index') }}" 
                class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('students.*') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
                 <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('students.*') ? 'text-azure-400' : 'text-azure-300 group-hover:text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -29,7 +29,7 @@
                 </svg>
                 <span>Students</span>
             </a>
-            @endhasanyrole
+            @endrole
 
             <!-- Sessions -->
             @role('HOD')
@@ -238,7 +238,7 @@
                 </a>
 
                 <!-- Students -->
-                @hasanyrole('HOD|Finance Officer')
+                @role('HOD')
                 <a href="{{ route('students.index') }}" 
                    class="group flex items-center py-2.5 px-3.5 text-sm font-medium rounded-lg transition-all duration-150 {{ request()->routeIs('students.*') ? 'bg-azure-800 text-white shadow-sm border-l-4 border-azure-400' : 'text-azure-200 hover:bg-azure-800/40 hover:text-white border-l-4 border-transparent' }}">
                     <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('students.*') ? 'text-azure-400' : 'text-azure-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -246,7 +246,7 @@
                     </svg>
                     <span>Students</span>
                 </a>
-                @endhasanyrole
+                @endrole
 
                 <!-- Sessions -->
                 @role('HOD')

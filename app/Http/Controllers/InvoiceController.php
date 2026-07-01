@@ -23,21 +23,23 @@ class InvoiceController extends Controller
             $query->where('student_id', $user->student->id);
         }
         
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->get('search');
-            $query->where('invoice_number', 'like', "%{$search}%")
-                  ->orWhereHas('student', function($q) use ($search) {
-                      $q->where('index_number', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                  ->orWhereHas('student', function($sq) use ($search) {
+                      $sq->where('index_number', 'like', "%{$search}%")
+                         ->orWhere('first_name', 'like', "%{$search}%")
+                         ->orWhere('last_name', 'like', "%{$search}%");
                   });
+            });
         }
 
-        if ($request->has('status') && $request->get('status') !== '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->get('status'));
         }
 
-        $invoices = $query->latest()->paginate(20);
+        $invoices = $query->latest()->paginate(20)->withQueryString();
         return view('invoices.index', compact('invoices'));
     }
 
@@ -50,6 +52,12 @@ class InvoiceController extends Controller
 
         $invoice->load(['student.programme', 'academicSession', 'items.due', 'payments']);
         return view('invoices.show', compact('invoice'));
+    }
+
+    public function print(Invoice $invoice)
+    {
+        $invoice->load(['student.programme', 'student.currentLevel', 'academicSession', 'items.due', 'payments.receipt']);
+        return view('invoices.print', compact('invoice'));
     }
 
     public function createGenerationForm()

@@ -101,13 +101,13 @@ class StudentAuthorizationTest extends TestCase
             'status' => 'active',
         ]);
 
-        // CAN access index
+        // CANNOT access index
         $response = $this->actingAs($finance)->get(route('students.index'));
-        $response->assertStatus(200);
+        $response->assertStatus(403);
 
-        // CAN access show
+        // CANNOT access show
         $response = $this->actingAs($finance)->get(route('students.show', $student));
-        $response->assertStatus(200);
+        $response->assertStatus(403);
 
         // CANNOT access create form
         $response = $this->actingAs($finance)->get(route('students.create'));
