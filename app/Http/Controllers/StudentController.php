@@ -177,11 +177,33 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        // Instead of hard delete, we set status to suspended/inactive 
-        // as per the requirement "No academic records are deleted".
-        $student->update(['status' => 'suspended']);
+        // Check if student has payments to protect financial audit log integrity
+        if ($student->payments()->exists()) {
+            return redirect()->route('students.index')->with('error', 'Cannot delete student with existing payment records. You can suspend them instead.');
+        }
 
-        return redirect()->route('students.index')->with('success', 'Student has been suspended. Academic records are preserved.');
+        try {
+            DB::transaction(function () use ($student) {
+                // Delete associated invoices (safe as no payments exist)
+                $student->invoices()->delete();
+
+                // Delete academic history records
+                $student->academicRecords()->delete();
+
+                // Delete the associated user account (delete student first or after, user has relation)
+                $user = $student->user;
+                
+                $student->delete();
+
+                if ($user) {
+                    $user->delete();
+                }
+            });
+        } catch (\Exception $e) {
+            return redirect()->route('students.index')->with('error', 'An error occurred during deletion: ' . $e->getMessage());
+        }
+
+        return redirect()->route('students.index')->with('success', 'Student and their user account have been deleted successfully.');
     }
 
     /**

@@ -10,9 +10,18 @@
                 </h2>
             </div>
             @role('HOD')
-            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600">
-                Edit Profile
-            </a>
+            <div class="flex space-x-2">
+                <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600">
+                    Edit Profile
+                </a>
+                <form action="{{ route('students.destroy', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this student and their user account? This cannot be undone.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
+                        Delete Student
+                    </button>
+                </form>
+            </div>
             @endrole
         </div>
     </x-slot>

@@ -28,6 +28,12 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    @endif
+
                     <form method="GET" action="{{ route('students.index') }}" class="mb-6">
                         <div class="flex">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or ID..." class="rounded-l-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 flex-1">
@@ -78,7 +84,12 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('students.show', $student) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
                                             @role('HOD')
-                                            <a href="{{ route('students.edit', $student) }}" class="text-gray-600 hover:text-gray-900">Edit</a>
+                                            <a href="{{ route('students.edit', $student) }}" class="text-gray-600 hover:text-gray-900 mr-3">Edit</a>
+                                            <form action="{{ route('students.destroy', $student) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this student and their user account? This cannot be undone.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                            </form>
                                             @endrole
                                         </td>
                                     </tr>

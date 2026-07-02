@@ -72,12 +72,14 @@ class StudentAuthorizationTest extends TestCase
         $response->assertRedirect(route('students.show', $student));
         $this->assertDatabaseHas('students', ['first_name' => 'Alice Updated']);
 
-        // Can delete a student (which suspends them)
+        // Can delete a student
         $response = $this->actingAs($hod)->delete(route('students.destroy', $student));
         $response->assertRedirect(route('students.index'));
-        $this->assertDatabaseHas('students', [
+        $this->assertDatabaseMissing('students', [
             'index_number' => 'STU100',
-            'status' => 'suspended',
+        ]);
+        $this->assertDatabaseMissing('users', [
+            'email' => 'alice@example.com',
         ]);
     }
 
@@ -147,5 +149,69 @@ class StudentAuthorizationTest extends TestCase
         // CANNOT delete
         $response = $this->actingAs($finance)->delete(route('students.destroy', $student));
         $response->assertStatus(403);
+    }
+
+    public function test_hod_cannot_delete_student_with_payments(): void
+    {
+        $hod = User::factory()->create();
+        $hod->assignRole('HOD');
+
+        $programme = Programme::create(['name' => 'Computer Science', 'code' => 'CS']);
+        $level = AcademicLevel::create(['name' => 'Level 100', 'numeric_value' => 100]);
+
+        $studentUser = User::factory()->create(['email' => 'student@test.com']);
+        $studentUser->assignRole('Student');
+
+        $student = Student::create([
+            'user_id' => $studentUser->id,
+            'index_number' => 'STU500',
+            'first_name' => 'Bob',
+            'last_name' => 'Payments',
+            'email' => 'student@test.com',
+            'programme_id' => $programme->id,
+            'current_level_id' => $level->id,
+            'status' => 'active',
+        ]);
+
+        $session = \App\Models\AcademicSession::create(['name' => '2026/2027', 'status' => 'active']);
+        $due = \App\Models\Due::create([
+            'category_name' => 'COMPSSA Dues',
+            'amount' => 100,
+            'academic_session_id' => $session->id,
+            'academic_level_id' => $level->id,
+            'programme_id' => $programme->id,
+            'due_date' => now()->addMonth(),
+        ]);
+
+        // Create an invoice
+        $invoice = \App\Models\Invoice::create([
+            'invoice_number' => 'INV-TEST-001',
+            'student_id'     => $student->id,
+            'academic_session_id' => $session->id,
+            'total_amount'   => 100,
+            'paid_amount'    => 100,
+            'balance'        => 0,
+            'status'         => 'paid',
+        ]);
+
+        // Create a payment
+        \App\Models\Payment::create([
+            'invoice_id'       => $invoice->id,
+            'amount'           => 100,
+            'payment_date'     => now(),
+            'payment_method'   => 'cash',
+            'reference_number' => 'TXN123',
+            'recorded_by'      => $hod->id,
+        ]);
+
+        // Attempt delete
+        $response = $this->actingAs($hod)->delete(route('students.destroy', $student));
+        $response->assertRedirect(route('students.index'));
+        $response->assertSessionHas('error', 'Cannot delete student with existing payment records. You can suspend them instead.');
+
+        // Verify student still exists
+        $this->assertDatabaseHas('students', [
+            'id' => $student->id,
+        ]);
     }
 }
